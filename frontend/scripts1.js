@@ -19,6 +19,46 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchResultsList = document.getElementById('searchResultsList');
   let editContactId = null;
 
+    var contactsList;
+
+    async function getData() {
+        try {
+            const response = await fetch('/contacts');
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+            contactsList = await response.json();
+            console.log('Data:');
+            console.log(contactsList);
+            populateTable();
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
+    async function populateTable() {
+        contactTableBody.innerHTML = '';
+        console.log("Removed innerhtml");
+        contactsList.forEach(contact => {
+
+        const newRow = document.createElement('tr');
+        newRow.dataset.id = Date.now();
+        newRow.innerHTML = `
+              <td>${contact.name}</td>
+              <td>${contact.email}</td>
+              <td>${contact.phone}</td>
+              <td class="action-btns">
+                  <button onclick="editContact(${newRow.dataset.id})">Edit</button>
+                  <button onclick="deleteContact(${newRow.dataset.id})">Delete</button>
+              </td>
+          `;
+        contactTableBody.appendChild(newRow);
+        });
+    }
+
+
+
   // Handle Login
   loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -28,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (username === USER_CREDENTIALS.username && password === USER_CREDENTIALS.password) {
           loginContainer.style.display = 'none';
           contactContainer.style.display = 'block';
+            getData();
       } else {
           loginError.textContent = 'Invalid username or password.';
       }
@@ -47,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
       contactModal.style.display = 'block';
   });
 
-  /*contactForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+  contactForm.addEventListener('submit', (e) => {
+      //e.preventDefault();
       const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const phone = document.getElementById('phone').value;
@@ -65,8 +106,28 @@ document.addEventListener('DOMContentLoaded', () => {
           formError.textContent = 'Phone number should be 10 digits.';
           return;
       }
+        console.log("inserted");
+        getData();
+        console.log("viewable");
 
-      if (editContactId) {
+        contactsList.forEach(contact => {
+
+        const newRow = document.createElement('tr');
+        newRow.dataset.id = Date.now();
+        newRow.innerHTML = `
+              <td>${contact.name}</td>
+              <td>${contact.email}</td>
+              <td>${contact.phone}</td>
+              <td class="action-btns">
+                  <button onclick="editContact(${newRow.dataset.id})">Edit</button>
+                  <button onclick="deleteContact(${newRow.dataset.id})">Delete</button>
+              </td>
+          `;
+        contactTableBody.appendChild(newRow);
+        });
+
+
+      /*if (editContactId) {
           // Edit existing contact
           const row = document.querySelector(`tr[data-id="${editContactId}"]`);
           row.cells[0].textContent = name;
@@ -86,10 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
               </td>
           `;
           contactTableBody.appendChild(newRow);
-      }
+      }*/
 
       contactModal.style.display = 'none';
-  });*/
+  });
 
   window.editContact = (id) => {
       const row = document.querySelector(`tr[data-id="${id}"]`);

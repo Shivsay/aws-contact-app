@@ -16,6 +16,8 @@ app.get("/", (req, res) => {
 app.get("/contacts", async (req, res) => {
     try {
         const contacts = await Contact.find({});
+        console.log("GETTING");
+        res.json(contacts);
     } catch {
         res.status(500).json({messaage: "cannot connect"});
     }
@@ -25,7 +27,7 @@ app.post("/add", async (req, res) => {
     try {
         const contact = await Contact.create(req.body);
         console.log("Added");
-        res.redirect('/');
+        //res.redirect('/');
     } catch {
         res.status(500).json({message: "cannot add"});
         console.log("Error while Added");
