@@ -68,6 +68,7 @@ app.delete("/delete/:id", async (req, res) => {
     }
 });
 
+// connecting to MongoDB
 mongoose.connect(process.env.MONGO_URL).then(() => { 
     console.log("Connected to MongoDB")
 
