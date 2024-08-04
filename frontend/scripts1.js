@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginError = document.getElementById('loginError');
   const logoutBtn = document.getElementById('logoutBtn');
   const contactModal = document.getElementById('contactModal');
+  const editContactModal = document.getElementById('editContactModal');
   const searchModal = document.getElementById('searchModal');
   const closeBtns = document.querySelectorAll('.close-btn');
   const contactForm = document.getElementById('contactForm');
@@ -36,43 +37,63 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error.message);
         }
     }
-
-    async function populateTable() {
+ 
+   async function populateTable() {
         contactTableBody.innerHTML = '';
         console.log("Removed innerhtml");
         contactsList.forEach(contact => {
+         console.log("Pop");
+         console.log(contact._id);
 
         const newRow = document.createElement('tr');
-        newRow.dataset.id = Date.now();
+        newRow.dataset.id =contact._id;
         newRow.innerHTML = `
               <td>${contact.name}</td>
               <td>${contact.email}</td>
               <td>${contact.phone}</td>
               <td class="action-btns">
-                  <button onclick="editContact(${newRow.dataset.id})">Edit</button>
-                  <button onclick="deleteContact(${newRow.dataset.id})">Delete</button>
+                  <button class="edit-btn"">Edit</button>
+                  <button class="delete-btn">Delete</button>
               </td>
           `;
         contactTableBody.appendChild(newRow);
+
+         newRow.querySelector('.delete-btn').addEventListener('click', async () =>
+         {
+               await fetch(`/delete/${contact._id}`, { method: 'DELETE'});
+               console.log("Deleted:",contact._id);
+               getData();
+
+            });
+
+         // delete contact then create a new one for updating
+         newRow.querySelector('.edit-btn').addEventListener('click', async () =>
+         {
+               //document.getElementById('modalTitle').textContent = 'Edit Contact';
+               /*document.getElementById('contactForm').reset();
+
+               editContactModal.style.display = 'block';*/
+               /*await fetch(`/edit/${contact._id}`, { method: 'put'});
+               console.log("Edited:",contact._id);*/
+
+               document.getElementById('modalTitle').textContent = 'Edit Contact';
+               document.getElementById('contactForm').reset();
+               editContactId = 1;
+               contactModal.style.display = 'block';
+               document.getElementById('edit-create-close-btn').style.display = 'none';
+               document.getElementById('name').value = contact.name;
+               document.getElementById('email').value = contact.email;
+               document.getElementById('phone').value = contact.phone;
+               await fetch(`/delete/${contact._id}`, { method: 'DELETE'});
+               console.log("Updating:",contact._id);
+               getData();
+            });
         });
     }
 
 
-
-  // Handle Login
-  loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-
-      if (username === USER_CREDENTIALS.username && password === USER_CREDENTIALS.password) {
-          loginContainer.style.display = 'none';
-          contactContainer.style.display = 'block';
-            getData();
-      } else {
-          loginError.textContent = 'Invalid username or password.';
-      }
-  });
+   // populate the table on opening
+   getData();
 
   // Handle Logout
   logoutBtn.addEventListener('click', () => {
@@ -90,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   contactForm.addEventListener('submit', (e) => {
       //e.preventDefault();
+      //
+
       const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const phone = document.getElementById('phone').value;
@@ -106,53 +129,17 @@ document.addEventListener('DOMContentLoaded', () => {
           formError.textContent = 'Phone number should be 10 digits.';
           return;
       }
+      
+      if(editContactId === 1) {
+      }
         console.log("inserted");
         getData();
         console.log("viewable");
 
-        contactsList.forEach(contact => {
-
-        const newRow = document.createElement('tr');
-        newRow.dataset.id = Date.now();
-        newRow.innerHTML = `
-              <td>${contact.name}</td>
-              <td>${contact.email}</td>
-              <td>${contact.phone}</td>
-              <td class="action-btns">
-                  <button onclick="editContact(${newRow.dataset.id})">Edit</button>
-                  <button onclick="deleteContact(${newRow.dataset.id})">Delete</button>
-              </td>
-          `;
-        contactTableBody.appendChild(newRow);
-        });
-
-
-      /*if (editContactId) {
-          // Edit existing contact
-          const row = document.querySelector(`tr[data-id="${editContactId}"]`);
-          row.cells[0].textContent = name;
-          row.cells[1].textContent = email;
-          row.cells[2].textContent = phone;
-      } else {
-          // Add new contact
-          const newRow = document.createElement('tr');
-          newRow.dataset.id = Date.now();
-          newRow.innerHTML = `
-              <td>${name}</td>
-              <td>${email}</td>
-              <td>${phone}</td>
-              <td class="action-btns">
-                  <button onclick="editContact(${newRow.dataset.id})">Edit</button>
-                  <button onclick="deleteContact(${newRow.dataset.id})">Delete</button>
-              </td>
-          `;
-          contactTableBody.appendChild(newRow);
-      }*/
-
       contactModal.style.display = 'none';
   });
 
-  window.editContact = (id) => {
+  /*window.editContact = (id) => {
       const row = document.querySelector(`tr[data-id="${id}"]`);
       document.getElementById('name').value = row.cells[0].textContent;
       document.getElementById('email').value = row.cells[1].textContent;
@@ -161,14 +148,19 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('contactId').value = id;
       editContactId = id;
       contactModal.style.display = 'block';
-  };
+  };*/
 
-  window.deleteContact = (id) => {
+   // this is where the delete stuff goes
+
+
+  /*window.deleteContact = (id) => {
+      id = String(id);
+      console.log(id);
       document.querySelector(`tr[data-id="${id}"]`).remove();
       if (!contactTableBody.rows.length) {
           noResultsMessage.style.display = 'block';
       }
-  };
+  };*/
 
   // Handle Search
   searchBtn.addEventListener('click', () => {
