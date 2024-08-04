@@ -13,6 +13,7 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname + '/../frontend/index1.html'));
 });
 
+// get all contacts
 app.get("/contacts", async (req, res) => {
     try {
         const contacts = await Contact.find({});
@@ -23,6 +24,7 @@ app.get("/contacts", async (req, res) => {
     }
 });
 
+// add a new contact
 app.post("/add", async (req, res) => {
     try {
         const contact = await Contact.create(req.body);
@@ -31,6 +33,38 @@ app.post("/add", async (req, res) => {
     } catch {
         res.status(500).json({message: "cannot add"});
         console.log("Error while Added");
+    }
+});
+
+// edit an existing contact
+app.put("/edit/:id", async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const updatedContact = await Contact.findByIdAndUpdate(contactId, req.body, { new: true });
+        if (!updatedContact) {
+            return res.status(404).json({ message: "Contact not found" });
+        }
+        console.log("Contact updated successfully:", updatedContact);
+        res.json(updatedContact);
+    } catch (error) {
+        console.error("Error while updating contact:", error);
+        res.status(500).json({ message: "Cannot update contact" });
+    }
+});
+
+// delete a contact
+app.delete("/delete/:id", async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const deletedContact = await Contact.findByIdAndDelete(contactId);
+        if (!deletedContact) {
+            return res.status(404).json({ message: "Contact not found" });
+        }
+        console.log("Contact deleted successfully:", deletedContact);
+        res.json({ message: "Contact deleted successfully" });
+    } catch (error) {
+        console.error("Error while deleting contact:", error);
+        res.status(500).json({ message: "Cannot delete contact" });
     }
 });
 
